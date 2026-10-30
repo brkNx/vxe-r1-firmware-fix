@@ -10,6 +10,16 @@ Official, verified firmware (`VXE_R1_V3.13.bin`) and unbrick recovery guide for 
 
 ---
 
+## 📸 Verified Working Status (Post-Recovery)
+
+Below is the verified working status in ATK HUB after flashing `VXE_R1_V3.13.bin`. The mouse correctly identifies as **VXE R1** (restoring authentic PixArt PAW3395 optical tracking and USB product descriptor), with active battery reporting and wireless functionality:
+
+<p align="center">
+  <img src="assets/vxe_r1_atk_hub_success.jpg" alt="VXE Dragonfly R1 successfully recovered and recognized in ATK HUB" width="850">
+</p>
+
+---
+
 ## 🚨 The Issue: "Buttons and clicks work, but cursor won't move"
 
 If you own a standard **VXE Dragonfly R1** and the cursor suddenly stops tracking while left/right clicks, wheel scrolls, USB enumeration, and LEDs still function normally, your mouse is **not physically broken**.
