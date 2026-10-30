@@ -1,4 +1,4 @@
-# VXE Dragonfly R1 - Dead Sensor Fix & Official Firmware Recovery (PAW3395 / CX52850P)
+# VXE Dragonfly R1 - Dead Optical Sensor Fix & Official Firmware Recovery
 
 [![VXE Dragonfly R1](https://img.shields.io/badge/Device-VXE%20Dragonfly%20R1-blue.svg)](https://github.com/brkNx/vxe-r1-firmware-fix)
 [![Sensor: PAW3395](https://img.shields.io/badge/Sensor-PixArt%20PAW3395-brightgreen.svg)](https://github.com/brkNx/vxe-r1-firmware-fix)
@@ -6,128 +6,104 @@
 [![Firmware: Official v3.13](https://img.shields.io/badge/Firmware-Official%20v3.13-purple.svg)](https://github.com/brkNx/vxe-r1-firmware-fix/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
 
-English | [Türkçe](#türkçe-kılavuz)
+Official, verified firmware (`VXE_R1_V3.13.bin`) and unbrick recovery guide for the **VXE Dragonfly R1** wireless gaming mouse suffering from a dead optical tracking sensor after accidental cross-flashing with R1 SE / SE+ firmware.
 
 ---
 
-## English Guide
+## 🚨 The Issue: "Buttons and clicks work, but cursor won't move"
 
-### 🚨 The Problem: "Mouse clicks work, but cursor does not move"
-If you own a standard **VXE Dragonfly R1** (PixArt PAW3395 sensor) and your mouse cursor suddenly stopped moving while left/right clicks, scroll wheel, and RGB still work perfectly:
-- **You accidentally flashed `VXER1SE_V3.14.bin` or used "One-Click Recovery" selecting `VXE R1 SE` in ATK Hub.**
-- **Why it happens:** The VXE Dragonfly R1 uses a **PixArt PAW3395** sensor, whereas the R1 SE / R1 SE+ uses a **PAW3395SE** sensor. Both mice share the same **CompX CX52850P** MCU and USB Product ID (`0xF58F`). When R1 SE firmware is written to a standard R1, the MCU boots up normally (so USB and button clicks work), but the sensor driver fails SPI initialization. As a result, the optical sensor remains unpowered and dead.
-- **Why ATK Hub gets stuck at "Upgrade device not found":** WebHID in browsers (like Brave or Chrome at `hub.atk.pro`) cannot access the bootloader (`VID_3554&PID_F406`) automatically, and older/corrupted binaries (`R1-V1.12.bin` from F1 series) fail endpoint verification.
+If you own a standard **VXE Dragonfly R1** and the cursor suddenly stops tracking while left/right clicks, wheel scrolls, USB enumeration, and LEDs still function normally, your mouse is **not physically broken**.
 
----
-
-### 🛠️ Solution & Recovery Steps
-
-#### Step 1: Download the Authentic Firmware
-Download **`VXE_R1_V3.13.bin`** directly from this repository:
-- **[Download VXE_R1_V3.13.bin (Official Release)](https://github.com/brkNx/vxe-r1-firmware-fix/releases/latest)**
-- *Checksum & Metadata:*
-  - Chipset: CompX CX52850P
-  - Sensor: PixArt PAW3395
-  - Target Version: `3.13`
-  - Normal Endpoint: `VID_3554&PID_F58F&MI_01&COL05`
-  - Bootloader Endpoint: `VID_3554&PID_F406&MI_01&COL02`
-  - Official ATK Cloud Source: `https://api-hub-cloud.atk.pro/firmware/13652/62863/r1`
-
-#### Step 2: Use ATK HUB Desktop (Not Web Browser)
-1. Close any `hub.atk.pro` browser tabs to prevent WebHID port conflicts.
-2. Open the official desktop software: **ATK HUB** (version 3.2.x or newer).
-3. If the mouse is already connected via USB-C cable and shows up:
-   - Go to **Settings (Gear icon ⚙️)** on the left sidebar.
-   - Click **Firmware Tools (固件工具)**.
-   - Click **Mouse firmware tool**.
-   - Browse and select `VXE_R1_V3.13.bin`.
-   - Start the update.
-
-#### Step 3: Hardware Bootloader Mode (If mouse is not recognized)
-If ATK Hub shows "Device not found" or "Upgrade device not found":
-1. Unplug the USB-C cable from the mouse.
-2. Flip the mouse bottom power switch to **OFF** (middle position).
-3. Press and hold **Left Click + Right Click** simultaneously.
-4. While holding both buttons, plug the USB-C cable back into your PC.
-5. Keep holding for 3–5 seconds, then release.
-6. The mouse will enumerate as **`USB\VID_3554&PID_F406`** (CompX Bootloader).
-7. ATK HUB desktop will automatically prompt "Abnormal Device Detected" / "One-Click Recovery", or you can load `VXE_R1_V3.13.bin` in the Mouse Firmware Tool.
-8. Once the flash completes 100%, the mouse reboots and optical tracking is immediately restored!
+### Technical Root Cause
+- **Hardware Architecture:** The standard **VXE Dragonfly R1** is powered by a **CompX CX52850P** MCU (Beken BK3633 core) paired with a high-end **PixArt PAW3395** optical sensor.
+- **Accidental Cross-Flashing:** The budget **VXE R1 SE** and **R1 SE+** variants share the exact same USB Vendor ID (`0x3554`), Product ID (`0xF58F`), and MCU family, but utilize the cheaper **PixArt PAW3395SE** sensor.
+- **What Went Wrong:** When users connect to ATK Hub or click "One-Click Recovery", ATK Hub often defaults to `VXE R1 SE` and flashes `VXER1SE_V3.14.bin`. Because the SE binary contains machine code tailored to the SE sensor's register addresses and pinouts, the MCU boots up (handling USB HID buttons), but **SPI communication with the physical PAW3395 sensor fails completely**, leaving the optical engine uninitialized and dead.
+- **Why Web Flashing Fails:** Using web drivers like `hub.atk.pro` in Chromium browsers (Brave, Chrome) causes WebHID permission blocks on the bootloader (`VID_3554&PID_F406`), resulting in the dreaded `"Upgrade device not found"` loop. Furthermore, older binaries floating around (`R1-V1.12.bin`) originated from the F1 series and fail endpoint validation.
 
 ---
 
-### ❓ FAQ (Frequently Asked Questions)
+## 📥 Downloads
 
-**Q: Did my optical sensor physically burn out?**  
-A: No! The PAW3395 hardware is intact. It only failed to communicate over SPI bus because the MCU was executing firmware instructions compiled for the SE sensor pinout.
+| File | Description | Download Link |
+| :--- | :--- | :--- |
+| **`VXE_R1_V3.13.bin`** | Official authentic CompX CX52850P firmware for VXE Dragonfly R1 (PAW3395) | [**Download v3.13**](https://github.com/brkNx/vxe-r1-firmware-fix/releases/download/v3.13/VXE_R1_V3.13.bin) |
+| **Repository Clone** | Full source, docs, and direct binaries | `git clone https://github.com/brkNx/vxe-r1-firmware-fix.git` |
 
-**Q: Why does ATK Hub identify my mouse as "VXE R1SE"?**  
-A: ATK Hub reads the USB Product Name string from the active firmware. When the SE firmware was flashed, the mouse announced its USB descriptor string as "VXE R1SE". Flashing `VXE_R1_V3.13.bin` restores the authentic "VXE R1" descriptor.
-
-**Q: Will this break my 2.4G wireless receiver pairing?**  
-A: No. If the mouse does not automatically connect to the 2.4G dongle after flashing, press and hold Left + Middle + Right buttons for 3 seconds while in wireless mode to initiate 2.4G re-pairing.
+*Official ATK Cloud API Source:* `https://api-hub-cloud.atk.pro/firmware/13652/62863/r1` (`64ff9cd523604194782b5756b0f6ea89.bin`)
 
 ---
 
-<br>
+## 🛠️ Step-by-Step Unbrick & Recovery Guide
 
-## Türkçe Kılavuz
+### Step 1: Prepare Your Environment
+1. Close all browser tabs running `hub.atk.pro` to release exclusive WebHID handles.
+2. Download and launch the official **ATK HUB desktop client** (v3.2.x or newer).
+3. Connect the mouse directly to your PC via a USB-C data cable (do not use USB hubs). Unplug the 2.4G wireless dongle for now.
 
-### 🚨 Sorunun Nedeni: "Mouse tıklıyor ama imleç hareket etmiyor"
-Standart bir **VXE Dragonfly R1** (PixArt PAW3395 sensörlü) fareniz varsa ve sol/sağ tıklar çalışmasına rağmen imleç ekranda hiç oynamıyorsa:
-- **ATK Hub'da yanlışlıkla `VXER1SE_V3.14.bin` dosyası yüklendi veya "Tek Tıkla Kurtarma" (One-Click Recovery) ekranında `VXE R1 SE` modeli seçildi.**
-- **Neden Olur?** Standart VXE Dragonfly R1, **PixArt PAW3395** sensörüne sahiptir; SE modelleri ise **PAW3395SE** sensörü kullanır. Her iki model de aynı **CompX CX52850P** ana kontrol çipini (MCU) ve USB Kimliğini (`0xF58F`) paylaşır. SE yazılımı standart R1'e yüklendiğinde MCU çalışır (tıklamalar, RGB ve USB algılama devam eder), ancak PAW3395 sensörünün SPI sürücüsü başlatılamaz. Sensör kapalı kaldığı için imleç hareket etmez.
-- **Neden ATK Hub "Upgrade device not found" hatası veriyor?** Brave veya Chrome tarayıcısında WebHID (`hub.atk.pro`), Windows'taki `0xF406` bootloader arayüzünü otomatik yakalayamaz. Ayrıca internette dolaşan eski `R1-V1.12.bin` dosyaları F1 serisine aittir ve paket doğrulamasından geçemez.
-
----
-
-### 🛠️ Çözüm ve Kurtarma Adımları
-
-#### 1. Adım: Orijinal Firmware'i İndirin
-Bu repodan resmi ve temiz firmware'i indirin:
-- **[VXE_R1_V3.13.bin İndir (Resmi Sürüm)](https://github.com/brkNx/vxe-r1-firmware-fix/releases/latest)**
-- *Teknik Detaylar:*
-  - Donanım: CompX CX52850P MCU & PixArt PAW3395
-  - Hedef Sürüm: `3.13`
-  - Normal HID Endpoint: `VID_3554&PID_F58F&MI_01&COL05`
-  - Bootloader Endpoint: `VID_3554&PID_F406&MI_01&COL02`
-  - ATK Sunucu Kaynağı: `https://api-hub-cloud.atk.pro/firmware/13652/62863/r1`
-
-#### 2. Adım: Masaüstü ATK HUB Programını Kullanın
-1. Tarayıcıdaki `hub.atk.pro` sekmelerini kapatın (port çakışmasını engellemek için).
-2. Bilgisayarınızda kurulu olan **ATK HUB** masaüstü uygulamasını açın.
-3. Mouse kabloyla bağlıysa:
-   - Sol menüdeki **Ayarlar (Çark ⚙️)** simgesine tıklayın.
-   - **Firmware Tools (固件工具)** bölümüne gelin.
-   - **Mouse firmware tool** seçeneğini açın.
-   - İndirdiğiniz **`VXE_R1_V3.13.bin`** dosyasını seçip yüklemeyi başlatın.
-
-#### 3. Adım: Donanımsal Bootloader Modu (Mouse Algılanmıyorsa)
-Program "Upgrade device not found" diyorsa veya cihazı görmüyorsa:
-1. Mouse'un Type-C kablosunu çıkarın.
-2. Altındaki güç anahtarını **OFF** (orta konum) durumuna getirin.
-3. **Sol Tık + Sağ Tık** butonlarına aynı anda basılı tutun.
-4. Butonları bırakmadan Type-C kablosunu bilgisayara takın.
-5. 3–5 saniye basılı tuttuktan sonra bırakın.
-6. Mouse donanımsal olarak **`USB\VID_3554&PID_F406`** (CompX Bootloader) moduna geçer.
-7. ATK HUB masaüstü programı otomatik olarak "Anormal Cihaz Algılandı" / "Tek Tıkla Kurtarma" penceresini açacaktır (veya Mouse Firmware Tool üzerinden dosyayı seçebilirsiniz).
-8. Yükleme tamamlandığında fare yeniden başlar ve sensör anında çalışmaya başlar!
+### Step 2: Flash via ATK HUB Desktop
+1. In the ATK HUB desktop application, navigate to **Settings** (Gear icon ⚙️ on the bottom-left sidebar).
+2. Under the settings menu, click on **Firmware Tools (固件工具)**.
+3. Select **Mouse firmware tool**.
+4. In the file picker, select **`VXE_R1_V3.13.bin`**.
+5. Click **Upgrade**. The software will send the reset command, detect the bootloader, flash the 256KB image, and reboot the device.
 
 ---
 
-### ❓ Sıkça Sorulan Sorular (SSS)
+### Step 3: Hardware Bootloader Mode (Emergency Fallback)
+If ATK Hub shows *"Upgrade device not found"* or fails to switch the mouse automatically:
 
-**S: Faremin sensörü donanımsal olarak yandı mı / bozuldu mu?**  
-C: Hayır! Sensör tamamen sağlamdır. Yalnızca çipteki yazılım SE sensörü için derlendiğinden PAW3395 ile SPI haberleşmesi kuramamıştır. Doğru yazılım yüklendiğinde ilk günkü haline döner.
+```
+[Unplug Cable] ──> [Switch OFF] ──> [Hold LMB + RMB] ──> [Insert Cable] ──> [Release after 3s]
+```
 
-**S: Program mouse'umu neden "VXE R1SE" olarak görüyor?**  
-C: ATK Hub, cihaz adını yüklü firmware'in USB tanımlayıcısından okur. SE yazılımı yüklendiği için mouse kendini sisteme R1SE olarak tanıtmıştır. `VXE_R1_V3.13.bin` yüklendiğinde tekrar gerçek adı olan "VXE R1" olarak görünecektir.
-
-**S: Kablosuz 2.4G dongle bağlantısı bozulur mu?**  
-C: Genellikle eşleşme korunur. Eğer kablosuz modda bağlanmazsa, kablosuz moda alıp Sol + Orta (Tekerlek) + Sağ tık tuşlarına 3 saniye basılı tutarak dongle ile yeniden hızlıca eşleştirebilirsiniz.
+1. **Unplug** the USB-C cable from the mouse.
+2. Flip the power switch on the bottom of the mouse to **OFF** (middle position).
+3. Press and hold **Left Mouse Button + Right Mouse Button** simultaneously.
+4. While keeping both buttons pressed, plug the USB-C cable back in.
+5. Keep holding for 3 to 5 seconds, then release.
+6. Check Windows Device Manager: the mouse will now be enumerated as:
+   ```
+   USB\VID_3554&PID_F406 (CompX USB Bootloader)
+   ```
+7. Open ATK HUB desktop. It will automatically detect the abnormal bootloader device and prompt the recovery modal, or you can flash `VXE_R1_V3.13.bin` directly via the Mouse Firmware Tool.
+8. Once flashing reaches 100%, the mouse reboots into runtime PID `0xF58F` and optical tracking is immediately restored!
 
 ---
 
-### 📜 Lisans & Sorumluluk Reddi
-- Firmware dosyası doğrudan ATK Cloud altyapısından temin edilmiş resmi binary'dir (`64ff9cd523604194782b5756b0f6ea89.bin`).
-- Bu doküman, yanlış firmware yüklemesi sonucu sensör arızası yaşayan kullanıcıların cihazlarını kurtarması amacıyla hazırlanmıştır.
+## ❓ FAQ (Frequently Asked Questions)
+
+### Q: Did my mouse sensor burn out or break physically?
+**A:** No. The PixArt PAW3395 sensor is 100% fine. The issue is purely software-level: the MCU was executing firmware with the wrong SPI initialization sequence and pin configuration. Once the correct v3.13 firmware is flashed, tracking works perfectly.
+
+### Q: Why does ATK Hub display my mouse as "VXE R1SE"?
+**A:** ATK Hub identifies mice by reading the USB Product Name descriptor programmed into the active firmware. When the SE firmware was flashed, the mouse began reporting its name as "VXE R1SE". Flashing `VXE_R1_V3.13.bin` restores the authentic "VXE R1" product identity.
+
+### Q: Why does the web version (`hub.atk.pro`) fail with "No compatible devices found"?
+**A:** Chromium browsers restrict certain WebHID top-level collections for security reasons. When the mouse reboots into bootloader mode (`PID_F406`), the browser does not have pre-granted permissions and fails to discover the endpoint. The desktop ATK HUB client uses native system HID access (`node-hid`) and handles this automatically.
+
+### Q: Will this break my 2.4G wireless dongle pairing?
+**A:** In most cases, existing 2.4G pairing information is preserved in NVRAM. If your mouse does not reconnect wirelessly after flashing:
+1. Switch the mouse bottom switch to 2.4G wireless mode.
+2. Plug the 2.4G receiver into the PC.
+3. Press and hold **Left Click + Middle Wheel Click + Right Click** simultaneously for 3–5 seconds until the LED blinks rapidly to enter pairing mode.
+4. Place the mouse close to the dongle; pairing will complete automatically.
+
+---
+
+## 🔬 Hardware & Endpoint Technical Reference
+
+| Parameter | Application Runtime Mode | Bootloader / Recovery Mode |
+| :--- | :--- | :--- |
+| **Vendor ID (VID)** | `0x3554` (13652) | `0x3554` (13652) |
+| **Product ID (PID)** | `0xF58F` (62863) | `0xF406` (62470) |
+| **Primary HID Endpoint** | `MI_01&COL05` (UsagePage `0xFF04`, Usage `2`) | `MI_01&COL02` (UsagePage `0xFF02`, Usage `2`) |
+| **Status Reporting** | Standard mouse reports + Vendor packets | `MI_01&COL01` (`0xB0` prepare, `0xB1` data) |
+| **Optical Sensor** | PixArt PAW3395 (26,000 DPI, 650 IPS) | N/A (Bootloader execution) |
+| **MCU Family** | CompX CX52850P (Beken BK3633 architecture) | Hardware ROM Bootloader |
+
+---
+
+## 📜 License & Disclaimer
+- The firmware binary provided (`VXE_R1_V3.13.bin`) is an official, unmodified binary sourced directly from ATK Cloud CDN (`https://bpcdn.atkgear.com/hub-cloud/file/64ff9cd523604194782b5756b0f6ea89.bin`).
+- All product names, logos, and brands are property of their respective owners (VXE / VGN / ATK Gear).
+- This project is provided under the [MIT License](LICENSE) to assist community members in recovering bricked hardware.
